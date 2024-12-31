@@ -1,2 +1,3 @@
 # I Ching Three Coins for Android
- This is an adaptation of my three coins python app to java for android.
+ This is an adaptation of my three coins python app to java for android. 
+ It does it's coin tosses using cryptographically secure random number generation to provide maximal randomness. It draws either 0 or 1. 0 = 2 and 1 = 3. It flips the coin 3 times, producing one line of the hexagram 1, 0, 1 would be 3, 2, 3 which would add up to 7 which would be a solid line. It builds the hexagram from the bottom up, so the first dice rolls will build the bottom line of the hexagram upwards. It then considers any changing lines (lines which add up to 6 or 9) and then changes them accordingly. 
