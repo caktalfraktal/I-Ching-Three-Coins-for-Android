@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static class IChing {
 
-        // Store data about one line
         public static class CoinTossResult {
             public int[] coinValues; // each coin is 2 or 3
             public int sum;          // total of the three coins: 6..9
@@ -169,16 +169,28 @@ public class MainActivity extends AppCompatActivity {
             BINARY_TO_HEXAGRAM.put(0b010101, 63);
         }
 
+        /**
+         * Each coin toss tries "NativePRNGBlocking". If unavailable,
+         * fallback to default SecureRandom.
+         */
         public static CoinTossResult generateLine() {
             int[] coinValues = new int[3];
             int sum = 0;
             for (int i = 0; i < 3; i++) {
-                // Create a new SecureRandom for each coin flip
-                SecureRandom coinRandom = new SecureRandom();
+                SecureRandom coinRandom;
+                try {
+                    // Attempt to get "NativePRNGBlocking"
+                    coinRandom = SecureRandom.getInstance("NativePRNGBlocking");
+                } catch (NoSuchAlgorithmException e) {
+                    // Fallback to default
+                    coinRandom = new SecureRandom();
+                }
+
                 int flip = coinRandom.nextInt(2); // 0 or 1
                 coinValues[i] = (flip == 0 ? 2 : 3);
                 sum += coinValues[i];
             }
+
             int lineVal;
             switch (sum) {
                 case 6: lineVal = 6; break;  // old yin
@@ -235,18 +247,10 @@ public class MainActivity extends AppCompatActivity {
             return changed;
         }
 
-        /**
-         * The final method that performs the entire reading and returns
-         * a SpannableStringBuilder so we can keep the large hexagram symbol size.
-         */
         public static SpannableStringBuilder performDivination() {
-            // 1) cast 6 lines
             ArrayList<CoinTossResult> lines = castHexagramFlips();
 
-            // 2) primary hex
             int primaryIdx = getPrimaryHexagramIndex(lines);
-
-            // 3) check for changing lines
             int[] changes = getChangingLinePositions(lines);
             Integer secondaryIdx = null;
             if (changes.length > 0) {
@@ -254,10 +258,8 @@ public class MainActivity extends AppCompatActivity {
                 secondaryIdx = getPrimaryHexagramIndex(secLines);
             }
 
-            // Build up the text
             SpannableStringBuilder sb = new SpannableStringBuilder();
 
-            // Show the coin toss lines
             sb.append("Coin Tosses:\n");
             for (int i = 0; i < lines.size(); i++) {
                 CoinTossResult c = lines.get(i);
@@ -271,7 +273,6 @@ public class MainActivity extends AppCompatActivity {
             }
             sb.append("\n");
 
-            // Show the array of line values
             sb.append("Primary Hexagram: [");
             for (int i = 0; i < lines.size(); i++) {
                 sb.append(String.valueOf(lines.get(i).lineValue));
@@ -279,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
             }
             sb.append("]\n\n");
 
-            // Show primary hex info
             sb.append("Primary Hexagram:\n");
             String symbol = HEXAGRAMS[primaryIdx][0];
             SpannableStringBuilder symbolSpan = new SpannableStringBuilder(symbol);
@@ -291,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
             );
 
             sb.append("Hexagram: ");
-            sb.append(symbolSpan);  // bigger text for the symbol
+            sb.append(symbolSpan);
             sb.append("\n");
 
             sb.append("Name: ")
@@ -299,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
               .append(HEXAGRAMS[primaryIdx][1]).append("\n");
             sb.append("Represents: ").append(HEXAGRAMS[primaryIdx][2]).append("\n\n");
 
-            // If there's a secondary
             if (secondaryIdx != null) {
                 sb.append("Secondary Hexagram (after changes):\n");
                 String secSymbol = HEXAGRAMS[secondaryIdx][0];
@@ -326,7 +325,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ------------------- Activity Code -------------------
     private TextView textResult;
     private Button buttonCastHexagram;
 
@@ -341,8 +339,6 @@ public class MainActivity extends AppCompatActivity {
         buttonCastHexagram.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Each time user taps "Cast Hexagram," we do the entire divination
-                // using fresh SecureRandom instances for *each* coin toss
                 SpannableStringBuilder result = IChing.performDivination();
                 textResult.setText(result);
             }
