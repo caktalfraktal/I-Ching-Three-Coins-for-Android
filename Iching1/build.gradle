@@ -1,0 +1,4 @@
+// Usually minimal or empty with the new DSL
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
