@@ -51,7 +51,7 @@ public final class CoinSource {
         connection.setReadTimeout(120000);
         connection.setUseCaches(false);
         connection.setInstanceFollowRedirects(false);
-        connection.setRequestProperty("User-Agent", "ThreeCoins-Android/1.3");
+        connection.setRequestProperty("User-Agent", "ThreeCoins-Android/1.4");
         connection.setRequestProperty("Accept", "text/plain");
         connection.setRequestProperty("Cache-Control", "no-cache");
         try {

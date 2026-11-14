@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Three Coins</string>
     <string name="cast_hexagram">Cast Hexagram</string>
+    <string name="switch_dark_mode">Switch to dark mode</string>
+    <string name="switch_light_mode">Switch to light mode</string>
 </resources>

@@ -1,6 +1,12 @@
-# Three Coins for Android v1.3
+# Three Coins for Android v1.4
 
-Android source for the Three Coins I Ching caster. Open the `android` folder in Android Studio. The current package is `com.example.iching1`, version name `1.3`, version code `3`, with Android 5.0 (API 21) as the minimum supported version.
+Android source for the Three Coins I Ching caster. Open the `android` folder in Android Studio. The current package is `com.example.iching1`, version name `1.4`, version code `5`, with Android 5.0 (API 21) as the minimum supported version.
+
+## Light and dark mode
+
+Build 5 centers the sun artwork using a vector icon instead of a font character.
+
+The top-right monochrome sun button switches directly between light mode and a black-background dark mode. The preference is remembered. Switching colors preserves the current reading and any cast in progress. Version 1.4 retains the v1.3 casting logic, symbols, source selection and original icon. The supplied APK uses the same signing identity as the previous v1.3 APK and can be installed as an update.
 
 ## Included
 
@@ -54,7 +60,7 @@ Use that same `--key-dir` for subsequent builds. A lost private key cannot be re
 
 ## Copying this project to GitHub
 
-Upload this folder's contents, including `.gitignore`, `.gitattributes`, and the Gradle wrapper JAR. The supplied folder contains source, icons, build instructions and the signed v1.3 APK in `release/ThreeCoins-Android-v1.3.apk`. It has no private keys, passwords, local SDK paths, personal IDE settings, build caches or Git history.
+Upload this folder's contents, including `.gitignore`, `.gitattributes`, and the Gradle wrapper JAR. The supplied folder contains source, icons, build instructions and the signed v1.4 APK in `ThreeCoins-Android-v1.4.apk`. It has no private keys, passwords, local SDK paths, personal IDE settings, build caches or Git history.
 
 Generated keys, password files, build folders and local machine settings are excluded by `.gitignore`. The supplied release APK is intentionally included and may be uploaded to GitHub as a repository file or release asset. After building locally, do not upload `.private-signing/`, `.signing/`, or password/keystore files. Keep private backups separate from the GitHub copy.
 

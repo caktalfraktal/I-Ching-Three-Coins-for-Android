@@ -349,6 +349,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean darkMode;
+    private android.widget.ImageButton buttonTheme;
     private TextView textResult;
     private Button buttonCastHexagram;
 
@@ -359,6 +361,15 @@ public class MainActivity extends AppCompatActivity {
 
         textResult = findViewById(R.id.textResult);
         buttonCastHexagram = findViewById(R.id.buttonCastHexagram);
+
+        buttonTheme = findViewById(R.id.buttonTheme);
+        darkMode = getPreferences(MODE_PRIVATE).getBoolean("darkMode", false);
+        applyDisplayTheme();
+        buttonTheme.setOnClickListener(view -> {
+            darkMode = !darkMode;
+            getPreferences(MODE_PRIVATE).edit().putBoolean("darkMode", darkMode).apply();
+            applyDisplayTheme();
+        });
 
         CastModel model = new ViewModelProvider(this).get(CastModel.class);
         if (model.state.getValue() == null && savedInstanceState != null) {
@@ -374,6 +385,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         buttonCastHexagram.setOnClickListener(view -> model.cast());
+    }
+
+    private void applyDisplayTheme() {
+        int background = darkMode ? 0xff000000 : 0xfffafafa;
+        int foreground = darkMode ? 0xfff1f1f5 : 0xff171923;
+        findViewById(R.id.rootLayout).setBackgroundColor(background);
+        textResult.setTextColor(foreground);
+        buttonTheme.setColorFilter(foreground);
+        buttonTheme.setContentDescription(getString(darkMode
+                ? R.string.switch_light_mode : R.string.switch_dark_mode));
+        android.graphics.drawable.GradientDrawable circle = new android.graphics.drawable.GradientDrawable();
+        circle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        circle.setColor(darkMode ? 0xff111111 : 0xffffffff);
+        circle.setStroke(Math.max(1, Math.round(getResources().getDisplayMetrics().density)),
+                darkMode ? 0xff3e424e : 0xffc4c7d0);
+        // Clear the Material theme's button tint so the circle follows our palette.
+        androidx.core.view.ViewCompat.setBackgroundTintList(buttonTheme, null);
+        buttonTheme.setBackground(circle);
+        getWindow().setStatusBarColor(android.os.Build.VERSION.SDK_INT >= 23 ? background : 0xff000000);
+        getWindow().setNavigationBarColor(android.os.Build.VERSION.SDK_INT >= 26 ? background : 0xff000000);
+        int flags = 0;
+        if (!darkMode && android.os.Build.VERSION.SDK_INT >= 23)
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        if (!darkMode && android.os.Build.VERSION.SDK_INT >= 26)
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     @Override
