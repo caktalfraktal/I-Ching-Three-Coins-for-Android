@@ -54,8 +54,8 @@ Use that same `--key-dir` for subsequent builds. A lost private key cannot be re
 
 ## Copying this project to GitHub
 
-Upload this folder's contents, including `.gitignore`, `.gitattributes`, and the Gradle wrapper JAR. The supplied folder contains source, icons and build instructions. It has no private keys, passwords, local SDK paths, personal IDE settings, build caches or Git history.
+Upload this folder's contents, including `.gitignore`, `.gitattributes`, and the Gradle wrapper JAR. The supplied folder contains source, icons, build instructions and the signed v1.3 APK in `release/ThreeCoins-Android-v1.3.apk`. It has no private keys, passwords, local SDK paths, personal IDE settings, build caches or Git history.
 
-Generated keys, password files, build folders and APKs are excluded by `.gitignore`. Git ignore rules apply to Git operations; a manual website upload or a ZIP created from all files can still include ignored files. After building locally, never manually upload `.private-signing/`, `.signing/`, or password/keystore files. Keep private backups separate from the GitHub copy.
+Generated keys, password files, build folders and local machine settings are excluded by `.gitignore`. The supplied release APK is intentionally included and may be uploaded to GitHub as a repository file or release asset. After building locally, do not upload `.private-signing/`, `.signing/`, or password/keystore files. Keep private backups separate from the GitHub copy.
 
 The original project files were copied rather than moved. No license was added on the owner's behalf.

@@ -21,9 +21,7 @@ __pycache__/
 *.pyc
 build/
 dist/
-release/
 *.spec
-*.apk
 *.aab
 *.exe
 *.log
