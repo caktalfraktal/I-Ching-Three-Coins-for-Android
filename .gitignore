@@ -1,0 +1,31 @@
+# Private signing material and credentials
+.private-signing/
+.signing/
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+*password*.txt
+.env
+.env.*
+# Local machine paths, tools and generated output
+local.properties
+.gradle/
+.idea/
+.vscode/
+.venv/
+venv/
+__pycache__/
+*.pyc
+build/
+dist/
+release/
+*.spec
+*.apk
+*.aab
+*.exe
+*.log
+.DS_Store
+Thumbs.db

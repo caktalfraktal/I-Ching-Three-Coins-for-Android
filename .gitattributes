@@ -1,2 +1,9 @@
-# Auto detect text files and perform LF normalization
 * text=auto
+*.py text eol=lf
+*.java text eol=lf
+*.md text eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+*.png binary
+*.ico binary
