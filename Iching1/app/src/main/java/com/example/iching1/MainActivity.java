@@ -1,6 +1,12 @@
 package com.example.iching1;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import android.widget.Toast;
 
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
@@ -248,7 +254,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public static SpannableStringBuilder performDivination() {
-            ArrayList<CoinTossResult> lines = castHexagramFlips();
+            CoinSource.Cast cast = CoinSource.obtain(CoinSource::fetch, () -> {
+                ArrayList<CoinTossResult> local = castHexagramFlips();
+                int[] coins = new int[18];
+                for (int i = 0; i < 6; i++)
+                    System.arraycopy(local.get(i).coinValues, 0, coins, i * 3, 3);
+                return coins;
+            });
+            ArrayList<CoinTossResult> lines = linesFromCoins(cast.coins);
 
             int primaryIdx = getPrimaryHexagramIndex(lines);
             int[] changes = getChangingLinePositions(lines);
@@ -321,7 +334,18 @@ public class MainActivity extends AppCompatActivity {
                 sb.append("No changing lines - no secondary hexagram.\n");
             }
 
+            sb.append("\nRandomness source: ").append(cast.source);
             return sb;
+        }
+
+        static ArrayList<CoinTossResult> linesFromCoins(int[] coins) {
+            ArrayList<CoinTossResult> lines = new ArrayList<>();
+            for (int i = 0; i < 18; i += 3) {
+                int[] values = {coins[i], coins[i + 1], coins[i + 2]};
+                int sum = values[0] + values[1] + values[2];
+                lines.add(new CoinTossResult(values, sum, sum));
+            }
+            return lines;
         }
     }
 
@@ -336,12 +360,55 @@ public class MainActivity extends AppCompatActivity {
         textResult = findViewById(R.id.textResult);
         buttonCastHexagram = findViewById(R.id.buttonCastHexagram);
 
-        buttonCastHexagram.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SpannableStringBuilder result = IChing.performDivination();
-                textResult.setText(result);
+        CastModel model = new ViewModelProvider(this).get(CastModel.class);
+        if (model.state.getValue() == null && savedInstanceState != null) {
+            CharSequence reading = savedInstanceState.getCharSequence("reading", "");
+            model.state.setValue(new CastState(false, reading, false));
+        }
+        model.state.observe(this, state -> {
+            buttonCastHexagram.setEnabled(!state.busy);
+            buttonCastHexagram.setText(state.busy ? "Contacting RANDOM.ORG..." : getString(R.string.cast_hexagram));
+            if (state.reading != null) textResult.setText(state.reading);
+            if (state.error) {
+                Toast.makeText(this, "Unable to complete this cast. Please try again.", Toast.LENGTH_LONG).show();
             }
         });
+        buttonCastHexagram.setOnClickListener(view -> model.cast());
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        state.putCharSequence("reading", textResult.getText());
+        super.onSaveInstanceState(state);
+    }
+
+    static final class CastState {
+        final boolean busy;
+        final CharSequence reading;
+        final boolean error;
+        CastState(boolean busy, CharSequence reading, boolean error) {
+            this.busy = busy;
+            this.reading = reading;
+            this.error = error;
+        }
+    }
+
+    public static class CastModel extends ViewModel {
+        final MutableLiveData<CastState> state = new MutableLiveData<>();
+        private final ExecutorService worker = Executors.newSingleThreadExecutor();
+        public void cast() {
+            CastState previous = state.getValue();
+            if (previous != null && previous.busy) return;
+            CharSequence reading = previous == null ? null : previous.reading;
+            state.setValue(new CastState(true, reading, false));
+            worker.execute(() -> {
+                try {
+                    state.postValue(new CastState(false, IChing.performDivination(), false));
+                } catch (RuntimeException failure) {
+                    state.postValue(new CastState(false, reading, true));
+                }
+            });
+        }
+        @Override protected void onCleared() { worker.shutdownNow(); }
     }
 }
